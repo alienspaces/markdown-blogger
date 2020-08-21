@@ -1,0 +1,7 @@
+# dart
+.dart_tool
+.packages
+# default location for articles
+articles
+# environment
+.env

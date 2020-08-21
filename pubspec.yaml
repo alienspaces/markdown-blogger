@@ -1,0 +1,4 @@
+name: markdown_blogger
+dependencies:
+  markdown: ^2.1.7
+  http: ^0.12.2
