@@ -31,16 +31,16 @@ By default articles are located in their own directory inside an `articles` dire
 
 ### Environment Variables
 
-Environment variables are used for configuration making it easy to implement for automated publishing via CI pipelines and to keep all configuration in the one place.
+Environment variables are used for configuration making it easy to implement automated publishing with CI pipelines and it keeps all configuration in the one place.
 
 The following environment variables are required for publishing to Wordpress:
 
 ```bash
-# Wordpress - https://developer.wordpress.com/apps
+# Wordpress - https://developer.wordpress.com/appsWrite and publish posts to multiple social networking platforms using markdown only.
 export WORDPRESS_SITE=https://yoursite.com
 export WORDPRESS_CLIENT_ID=YOURNUMERICCLIENTID
 export WORDPRESS_CLIENT_SECRET=YourAlphaNumericClientSecret
-export WORDPRESS_USERNAME=youraccountusername
+export WORDPRESS_USERNAME=youraccountusernameWrite and publish posts to multiple social networking platforms using markdown only.
 export WORDPRESS_PASSWORD=youraccountpassword
 ```
 
