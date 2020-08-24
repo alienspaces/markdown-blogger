@@ -31,15 +31,6 @@ Future<void> main(List<String> arguments) async {
     List<LocalArticle> articles = getArticles();
     if (articles != null) {
       for (LocalArticle article in articles) {
-        // print("Article directory ${article.articleDirectory.path}");
-        // print("Article markdown ${article.markdownFile.path}");
-        // if (article.mediaFiles != null) {
-        //   print("Article media file count ${article.mediaFiles.length}");
-        // }
-        // if (article.metaFile != null) {
-        //   print("Article meta ${article.metaFile.path}");
-        // }
-
         // Get auth token data
         Map<String, dynamic> authTokenData = await wpAuthToken();
 
