@@ -44,7 +44,7 @@ The following environment variables are required for publishing to Wordpress:
 export WORDPRESS_SITE=https://yoursite.com
 export WORDPRESS_CLIENT_ID=YOURNUMERICCLIENTID
 export WORDPRESS_CLIENT_SECRET=YourAlphaNumericClientSecret
-export WORDPRESS_USERNAME=youraccountusernameWrite and publish posts to multiple social networking platforms using markdown only.
+export WORDPRESS_USERNAME=youraccountusername
 export WORDPRESS_PASSWORD=youraccountpassword
 ```
 
