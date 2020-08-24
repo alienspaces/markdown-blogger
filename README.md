@@ -17,7 +17,7 @@ Currently supports the following blogging platforms:
 
 ### Articles
 
-Article should be placed in their own directory inside an `articles` directory:
+Articles should be placed in their own directory inside an `articles` directory:
 
 ```bash
 ./articles
@@ -30,7 +30,7 @@ Article should be placed in their own directory inside an `articles` directory:
 ```
 
 * There should be only one `.md` file per directory.
-* The `.md` file name will be the article title.
+* The first `<h1>` tag found after HTML conversion will be used as the article title. If no heading tag can be found then the `.md` file name will be used as the article title.
 * A `.meta` file will be created automatically in each article directory to track changes. If you delete this file new posts will be created.
 
 ### Environment Variables
