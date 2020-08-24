@@ -40,7 +40,7 @@ Environment variables are used for configuration making it easy to implement aut
 The following environment variables are required for publishing to Wordpress:
 
 ```bash
-# Wordpress - https://developer.wordpress.com/appsWrite and publish posts to multiple social networking platforms using markdown only.
+# Wordpress - https://developer.wordpress.com/apps
 export WORDPRESS_SITE=https://yoursite.com
 export WORDPRESS_CLIENT_ID=YOURNUMERICCLIENTID
 export WORDPRESS_CLIENT_SECRET=YourAlphaNumericClientSecret
