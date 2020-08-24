@@ -121,6 +121,56 @@ Future<Map<String, dynamic>> wpCreate(
   return responseData;
 }
 
+// wpCreate -
+Future<Map<String, dynamic>> wpUpdate(
+    Map<String, dynamic> authTokenData, LocalArticle article) async {
+  // Access token
+  String accessToken = authTokenData["access_token"];
+
+  String articleTitle = article.articleTitle();
+  print('wpUpdate - articleTitle $articleTitle');
+
+  String articleContent = article.articleContent();
+  print('wpUpdate - articleContent $articleContent');
+
+  // Post request data
+  Map requestData = {
+    'title': articleTitle,
+    'content': articleContent,
+    'context': 'html',
+    'format': 'image',
+    'status': 'publish',
+  };
+
+  int siteId = article.siteId();
+  int postId = article.postId();
+
+  String url =
+      "https://public-api.wordpress.com/rest/v1.2/sites/$siteId/posts/$postId";
+
+  Map<String, String> headers = new HashMap();
+  headers['Accept'] = 'application/json';
+  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+  headers['Authorization'] = 'Bearer $accessToken';
+
+  Http.Response response = await Http.post(
+    url,
+    headers: headers,
+    body: requestData,
+    encoding: Encoding.getByName('utf-8'),
+  );
+
+  if (response.statusCode != 200) {
+    print('wpUpdate - status: ${response.statusCode}');
+    print('wpUpdate - body: ${response.body}');
+    return null;
+  }
+
+  Map<String, dynamic> responseData = jsonDecode(response.body);
+
+  return responseData;
+}
+
 // wpDeleteAll - delete all posts
 void wpDeleteAll(Map<String, dynamic> authTokenData) async {
   // Get all posts
@@ -134,8 +184,7 @@ void wpDeleteAll(Map<String, dynamic> authTokenData) async {
   // to iterate over this loop syncronously we need to use a for loop
   for (WordpressPost wpPost in wpPosts) {
     print("wpDeleteAll - Deleting post ID ${wpPost.id}");
-    Map<String, dynamic> deleteResponse = await wpDelete(authTokenData, wpPost);
-    print("wpDeleteAll - Deleted post $deleteResponse");
+    await wpDelete(authTokenData, wpPost);
   }
 }
 

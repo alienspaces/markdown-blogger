@@ -34,8 +34,17 @@ Future<void> main(List<String> arguments) async {
         // Get auth token data
         Map<String, dynamic> authTokenData = await wpAuthToken();
 
-        // Create article
-        await wpCreate(authTokenData, article);
+        if (article.metaFile != null) {
+          // Update article
+          Map<String, dynamic> response =
+              await wpUpdate(authTokenData, article);
+          await article.updateMeta(response);
+        } else {
+          // Create article
+          Map<String, dynamic> response =
+              await wpCreate(authTokenData, article);
+          await article.updateMeta(response);
+        }
       }
     }
   }

@@ -1,13 +1,73 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:markdown/markdown.dart';
 
+// Meta -
+class Meta {
+  int Id;
+  int siteId;
+  String modified;
+}
+
+// LocalArticle -
 class LocalArticle {
   final Directory articleDirectory;
   final File markdownFile;
   List<File> mediaFiles;
   final File metaFile;
   String _html;
+  Meta _meta;
+
+  Meta articleMeta() {
+    if (this._meta == null && this.metaFile != null) {
+      this._meta = new Meta();
+      dynamic metaJson = jsonDecode(this.metaFile.readAsStringSync());
+      if (metaJson != null) {
+        this._meta.Id = metaJson['ID'];
+        this._meta.siteId = metaJson['site_ID'];
+        this._meta.modified = metaJson['modified'];
+      }
+      print("Article META ${this._meta}");
+    }
+    return this._meta;
+  }
+
+  void updateMeta(Map<String, dynamic> response) {
+    print("updateMeta - response - $response");
+    final String metaFile = this.articleDirectory.path + "/.meta";
+    Map<String, dynamic> metaData = {
+      'ID': response['ID'],
+      'site_ID': response['site_ID'],
+      'modified': response['modified'],
+    };
+
+    new File(metaFile).writeAsStringSync(jsonEncode(metaData));
+  }
+
+  int postId() {
+    Meta articleMeta = this.articleMeta();
+    if (articleMeta != null) {
+      return articleMeta.Id;
+    }
+    return null;
+  }
+
+  int siteId() {
+    Meta articleMeta = this.articleMeta();
+    if (articleMeta != null) {
+      return articleMeta.siteId;
+    }
+    return null;
+  }
+
+  String modified() {
+    Meta articleMeta = this.articleMeta();
+    if (articleMeta != null) {
+      return articleMeta.modified;
+    }
+    return null;
+  }
 
   String articleHTML() {
     if (this.markdownFile == null) {
