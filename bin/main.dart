@@ -16,7 +16,7 @@ Future<void> main(List<String> arguments) async {
 
   // Delete all posts
   if (argResults[argDelete]) {
-    print("Deleting all remote posts");
+    print("Deleting posts");
     // Get auth token data
     Map<String, dynamic> authTokenData = await wpAuthToken();
 
@@ -26,7 +26,7 @@ Future<void> main(List<String> arguments) async {
 
   // Publish all local posts
   if (argResults[argPublish]) {
-    print("Publishing all local unpublished posts");
+    print("Publishing posts");
     // Get list of articles for site
     List<LocalArticle> articles = getArticles();
     if (articles != null) {
@@ -36,9 +36,11 @@ Future<void> main(List<String> arguments) async {
 
         if (article.metaFile != null) {
           // Update article
-          Map<String, dynamic> response =
-              await wpUpdate(authTokenData, article);
-          await article.updateMeta(response);
+          if (article.requiresUpdate() == true) {
+            Map<String, dynamic> response =
+                await wpUpdate(authTokenData, article);
+            await article.updateMeta(response);
+          }
         } else {
           // Create article
           Map<String, dynamic> response =

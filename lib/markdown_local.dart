@@ -28,13 +28,11 @@ class LocalArticle {
         this._meta.siteId = metaJson['site_ID'];
         this._meta.modified = metaJson['modified'];
       }
-      print("Article META ${this._meta}");
     }
     return this._meta;
   }
 
   void updateMeta(Map<String, dynamic> response) {
-    print("updateMeta - response - $response");
     final String metaFile = this.articleDirectory.path + "/.meta";
     Map<String, dynamic> metaData = {
       'ID': response['ID'],
@@ -45,7 +43,7 @@ class LocalArticle {
     new File(metaFile).writeAsStringSync(jsonEncode(metaData));
   }
 
-  int postId() {
+  int metaPostId() {
     Meta articleMeta = this.articleMeta();
     if (articleMeta != null) {
       return articleMeta.Id;
@@ -53,7 +51,7 @@ class LocalArticle {
     return null;
   }
 
-  int siteId() {
+  int metaSiteId() {
     Meta articleMeta = this.articleMeta();
     if (articleMeta != null) {
       return articleMeta.siteId;
@@ -61,12 +59,19 @@ class LocalArticle {
     return null;
   }
 
-  String modified() {
+  DateTime metaModified() {
     Meta articleMeta = this.articleMeta();
     if (articleMeta != null) {
-      return articleMeta.modified;
+      return DateTime.parse(articleMeta.modified);
     }
     return null;
+  }
+
+  bool requiresUpdate() {
+    DateTime localModified = this.markdownFile.lastModifiedSync().toUtc();
+    DateTime remoteModified = this.metaModified();
+    bool requiresUpdate = localModified.isAfter(remoteModified);
+    return requiresUpdate;
   }
 
   String articleHTML() {
@@ -76,7 +81,6 @@ class LocalArticle {
     }
     if (this._html == null) {
       this._html = markdownToHtml(this.markdownFile.readAsStringSync());
-      print("Article HTML ${this._html}");
     }
     return this._html;
   }

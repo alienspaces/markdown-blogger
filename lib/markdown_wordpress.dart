@@ -74,11 +74,7 @@ Future<Map<String, dynamic>> wpCreate(
   String accessToken = authTokenData["access_token"];
 
   String articleTitle = article.articleTitle();
-  print('wpCreate - articleTitle $articleTitle');
-
-  // String articleContent = article.articleContent();
   String articleContent = article.articleContent();
-  print('wpCreate - articleContent $articleContent');
 
   // Post request data
   Map requestData = {
@@ -128,10 +124,7 @@ Future<Map<String, dynamic>> wpUpdate(
   String accessToken = authTokenData["access_token"];
 
   String articleTitle = article.articleTitle();
-  print('wpUpdate - articleTitle $articleTitle');
-
   String articleContent = article.articleContent();
-  print('wpUpdate - articleContent $articleContent');
 
   // Post request data
   Map requestData = {
@@ -142,8 +135,8 @@ Future<Map<String, dynamic>> wpUpdate(
     'status': 'publish',
   };
 
-  int siteId = article.siteId();
-  int postId = article.postId();
+  int siteId = article.metaSiteId();
+  int postId = article.metaPostId();
 
   String url =
       "https://public-api.wordpress.com/rest/v1.2/sites/$siteId/posts/$postId";
