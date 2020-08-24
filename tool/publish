@@ -2,4 +2,4 @@
 
 source .env
 
-dart ./bin/main.dart
+dart ./bin/main.dart --publish

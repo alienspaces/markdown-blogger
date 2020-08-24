@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:http/http.dart' as Http;
 
+import 'markdown_blogger.dart';
+
 class WordpressPost {
   final int id;
   final int siteId;
@@ -15,23 +17,23 @@ class WordpressPost {
       this.id, this.siteId, this.title, this.content, this.featuredImage);
 }
 
-// getAuthToken -
-Future<Map<String, dynamic>> getAuthToken() async {
+// wpAuthToken -
+Future<Map<String, dynamic>> wpAuthToken() async {
   // Source configuration from environment
   String clientID = Platform.environment['WORDPRESS_CLIENT_ID'];
-  if (clientID.length == 0) {
+  if (clientID == null) {
     throw new Exception(["WORDPRESS_CLIENT_ID is required"]);
   }
   String clientSecret = Platform.environment['WORDPRESS_CLIENT_SECRET'];
-  if (clientSecret.length == 0) {
+  if (clientSecret == null) {
     throw new Exception(["WORDPRESS_CLIENT_SECRET is required"]);
   }
   String accountUsername = Platform.environment['WORDPRESS_USERNAME'];
-  if (accountUsername.length == 0) {
+  if (accountUsername == null) {
     throw new Exception(["WORDPRESS_USERNAME is required"]);
   }
   String accountPassword = Platform.environment['WORDPRESS_PASSWORD'];
-  if (accountPassword.length == 0) {
+  if (accountPassword == null) {
     throw new Exception(["WORDPRESS_PASSWORD is required"]);
   }
 
@@ -55,8 +57,8 @@ Future<Map<String, dynamic>> getAuthToken() async {
       encoding: Encoding.getByName('utf-8'));
 
   if (response.statusCode != 200) {
-    print('getAuthToken - status: ${response.statusCode}');
-    print('getAuthToken - body: ${response.body}');
+    print('wpAuthToken - status: ${response.statusCode}');
+    print('wpAuthToken - body: ${response.body}');
     return null;
   }
 
@@ -67,14 +69,23 @@ Future<Map<String, dynamic>> getAuthToken() async {
 
 // wpCreate -
 Future<Map<String, dynamic>> wpCreate(
-    Map<String, dynamic> authTokenData) async {
+    Map<String, dynamic> authTokenData, LocalArticle article) async {
   // Access token
   String accessToken = authTokenData["access_token"];
 
+  String articleTitle = article.articleTitle();
+  print('wpCreate - articleTitle $articleTitle');
+
+  // String articleContent = article.articleContent();
+  String articleContent = article.articleContent();
+  print('wpCreate - articleContent $articleContent');
+
   // Post request data
   Map requestData = {
-    'title': 'Test Post Creation',
-    'content': 'Test Post Content',
+    'title': articleTitle,
+    'content': articleContent,
+    'context': 'html',
+    'format': 'image',
     'status': 'publish',
   };
 
@@ -92,10 +103,12 @@ Future<Map<String, dynamic>> wpCreate(
   headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   headers['Authorization'] = 'Bearer $accessToken';
 
-  Http.Response response = await Http.post(url,
-      headers: headers,
-      body: requestData,
-      encoding: Encoding.getByName('utf-8'));
+  Http.Response response = await Http.post(
+    url,
+    headers: headers,
+    body: requestData,
+    encoding: Encoding.getByName('utf-8'),
+  );
 
   if (response.statusCode != 200) {
     print('wpCreate - status: ${response.statusCode}');
@@ -109,9 +122,7 @@ Future<Map<String, dynamic>> wpCreate(
 }
 
 // wpDeleteAll - delete all posts
-void wpDeleteAll() async {
-  // Get auth token data
-  Map<String, dynamic> authTokenData = await getAuthToken();
+void wpDeleteAll(Map<String, dynamic> authTokenData) async {
   // Get all posts
   List<WordpressPost> wpPosts = await wpGetAll(authTokenData);
   if (wpPosts.length == 0) {
@@ -119,6 +130,8 @@ void wpDeleteAll() async {
     return;
   }
 
+  // NOTE: forEach does not look at the return value to if we want
+  // to iterate over this loop syncronously we need to use a for loop
   for (WordpressPost wpPost in wpPosts) {
     print("wpDeleteAll - Deleting post ID ${wpPost.id}");
     Map<String, dynamic> deleteResponse = await wpDelete(authTokenData, wpPost);
@@ -216,8 +229,13 @@ Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
   List<dynamic> posts = responseData['posts'];
   List<WordpressPost> wpPosts = new List<WordpressPost>();
   posts.forEach((post) {
-    WordpressPost wpPost = new WordpressPost(post['ID'], post['site_ID'],
-        post['title'], post['content'], post['featured_image']);
+    WordpressPost wpPost = new WordpressPost(
+      post['ID'],
+      post['site_ID'],
+      post['title'],
+      post['content'],
+      post['featured_image'],
+    );
     wpPosts.add(wpPost);
   });
   return wpPosts;

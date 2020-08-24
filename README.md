@@ -1,10 +1,10 @@
 # Markdown Blogger
 
-Write and publish posts to multiple social networking platforms using markdown only.
+Write and publish posts to blogging platforms using markdown only.
 
 ## Support
 
-Currently supports the following social networking platforms:
+Currently supports the following blogging platforms:
 
 * Wordpress
 
@@ -17,17 +17,21 @@ Currently supports the following social networking platforms:
 
 ### Articles
 
-By default articles are located in their own directory inside an `articles` directory:
+Article should be placed in their own directory inside an `articles` directory:
 
 ```bash
 ./articles
 ./articles/20200814/
-./articles/20200814/article-title.md
-./articles/20200814/article-image.jpeg
+./articles/20200814/the-final-frontier.md
+./articles/20200814/enterprise.jpeg
 ./articles/20200821/
-./articles/20200821/article-title.md
-./articles/20200821/article-image.jpeg
+./articles/20200821/from-beyond.md
+./articles/20200821/alien.jpeg
 ```
+
+* There should be only one `.md` file per directory.
+* The `.md` file name will be the article title.
+* A `.meta` file will be created automatically in each article directory to track changes. If you delete this file new posts will be created.
 
 ### Environment Variables
 
@@ -44,17 +48,6 @@ export WORDPRESS_USERNAME=youraccountusernameWrite and publish posts to multiple
 export WORDPRESS_PASSWORD=youraccountpassword
 ```
 
-The following environment variables are required for publishing to Instagram:
-
-```bash
-# Instagram -
-export INSTAGRAM=
-export INSTAGRAM=
-export INSTAGRAM=
-export INSTAGRAM=
-export INSTAGRAM=
-```
-
 ### CLI
 
 To publish articles manually or via your CI pipeline:
@@ -64,8 +57,10 @@ To publish articles manually or via your CI pipeline:
 * Use scripts in the `./tool` directory
 
 ```bash
-# Publish all articles
+# Publish new and update all articles
 ./tool/publish
+# Delete all articles
+./tool/delete
 ```
 
 ## Why
@@ -75,4 +70,4 @@ I wanted to learn:
 * The [Dart](https://dart.dev/guides) programming language
 * The origins and creative process behind monsters in games
 
-So how about I write about and [publish](https://monsterweekly.com) my monster investigations using a tool I built with [Dart](https://dart.dev/guides).
+So how about I write regular articles about monsters and then [publish](https://monsterweekly.com) those articles using a tool I built with [Dart](https://dart.dev/guides).

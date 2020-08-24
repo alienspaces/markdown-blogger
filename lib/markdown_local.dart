@@ -1,19 +1,130 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:markdown/markdown.dart';
+
+class LocalArticle {
+  final Directory articleDirectory;
+  final File markdownFile;
+  List<File> mediaFiles;
+  final File metaFile;
+  String _html;
+
+  String articleHTML() {
+    if (this.markdownFile == null) {
+      print("articleHTML - error, markdownFile is null");
+      return null;
+    }
+    if (this._html == null) {
+      this._html = markdownToHtml(this.markdownFile.readAsStringSync());
+      print("Article HTML ${this._html}");
+    }
+    return this._html;
+  }
+
+  String articleTitle() {
+    // Try to get title from <h1> title in content
+    String articleTitle = this.articleTitleFromContent();
+    if (articleTitle == null) {
+      articleTitle = this.articleTitleFromFilename();
+    }
+
+    return articleTitle;
+  }
+
+  String articleTitleFromContent() {
+    String articleTitle;
+    List<String> articleLines = this.articleHTML().split("\n");
+    if (articleLines.first.startsWith('<h1>')) {
+      articleTitle = articleLines.first.replaceAll('<h1>', '');
+      articleTitle = articleTitle.replaceAll('</h1>', '');
+      articleTitle = articleTitle.replaceAll('-', ' ');
+      articleTitle = articleTitle.replaceAll('_', ' ');
+      articleTitle = articleTitle.toUpperCase();
+    }
+    return articleTitle;
+  }
+
+  String articleTitleFromFilename() {
+    if (this.markdownFile == null) {
+      print("articleTitleFromFilename - error, markdownFile is null");
+      return null;
+    }
+
+    String articlePath = this.markdownFile.path;
+    String articleFilename = articlePath.split('/').last;
+    String articleTitle = articleFilename.split('.').first;
+    articleTitle = articleTitle.replaceAll('-', ' ');
+    articleTitle = articleTitle.replaceAll('_', ' ');
+    articleTitle = articleTitle.toUpperCase();
+
+    return articleTitle;
+  }
+
+  String articleContent() {
+    // Remove initial title if it exists
+    List<String> articleLines = this.articleHTML().split("\n");
+    if (articleLines.first.startsWith('<h1>')) {
+      articleLines.removeAt(0);
+    }
+    String articleContent = articleLines.join("\n");
+    // Add a hard line break after all paragraphs
+    articleContent = articleContent.replaceAll('</p>', "</p>\n");
+    return articleContent;
+  }
+
+  LocalArticle(
+    this.articleDirectory,
+    this.markdownFile,
+    this.mediaFiles,
+    this.metaFile,
+  );
+}
 
 // getArticles - returns a list of local articles for site
-List<FileSystemEntity> getArticles() {
+List<LocalArticle> getArticles() {
   // Articles directory for site
   var articleDir = new Directory("./articles");
 
   // Check the directory exists or return
   if (articleDir.existsSync() != true) {
+    print("getArticles - Missing articles directory");
     return null;
   }
 
-  // List directory contents, recursing into sub-directories,
-  // but not following symbolic links.
-  List<FileSystemEntity> articles =
+  List<LocalArticle> localArticles = [];
+
+  // Article directories
+  List<FileSystemEntity> articleDirectories =
       articleDir.listSync(recursive: false, followLinks: false);
 
-  return articles;
+  // Article directory files
+  for (FileSystemEntity articleDirectory in articleDirectories) {
+    List<FileSystemEntity> articleFiles = (articleDirectory as Directory)
+        .listSync(recursive: false, followLinks: false);
+
+    File markdownFile;
+    List<File> mediaFiles = [];
+    File metaFile;
+
+    for (FileSystemEntity articleFile in articleFiles) {
+      String filePath = (articleFile as File).path;
+      if (filePath.endsWith(".md")) {
+        markdownFile = (articleFile as File);
+      } else if (filePath.endsWith("meta")) {
+        metaFile = (articleFile as File);
+      } else {
+        mediaFiles.add((articleFile as File));
+      }
+    }
+
+    LocalArticle localArticle = new LocalArticle(
+      articleDirectory,
+      markdownFile,
+      mediaFiles,
+      metaFile,
+    );
+    localArticles.add(localArticle);
+  }
+
+  return localArticles;
 }
