@@ -3,3 +3,4 @@ dependencies:
   args: ^1.6.0
   markdown: ^2.1.7
   http: ^0.12.2
+  dio: ^3.0.10

@@ -2,7 +2,8 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as Http;
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 
 import 'markdown_blogger.dart';
 
@@ -51,7 +52,7 @@ Future<Map<String, dynamic>> wpAuthToken() async {
   headers['Accept'] = 'application/json';
   headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 
-  Http.Response response = await Http.post(url,
+  http.Response response = await http.post(url,
       headers: headers,
       body: authRequestData,
       encoding: Encoding.getByName('utf-8'));
@@ -67,6 +68,59 @@ Future<Map<String, dynamic>> wpAuthToken() async {
   return authResponseData;
 }
 
+// wpUploadMedia -
+Future<Map<String, dynamic>> wpUploadMedia(
+    Map<String, dynamic> authTokenData, String mediaPath) async {
+  // Access token
+  String accessToken = authTokenData["access_token"];
+
+  // Site
+  String site = Platform.environment['WORDPRESS_SITE'];
+  if (site.length == 0) {
+    throw new Exception(["WORDPRESS_SITE is required"]);
+  }
+
+  Map<String, String> headers = new HashMap();
+  headers['authorization'] = 'Bearer $accessToken';
+  headers['content-type'] = 'multipart/form-data';
+
+  FormData formData = FormData.fromMap({
+    "media": [
+      await MultipartFile.fromFile(
+        mediaPath,
+        filename: mediaPath.split("/").last,
+      ),
+    ],
+  });
+
+  Dio dio = new Dio();
+  // dio.interceptors.add(LogInterceptor(responseBody: false));
+  Response response;
+
+  try {
+    response = await dio.post(
+      'https://public-api.wordpress.com/rest/v1.1/sites/$site/media/new',
+      data: formData,
+      options: Options(
+        headers: headers,
+      ),
+    );
+  } on DioError catch (e) {
+    if (e.response != null) {
+      print(e.response.data);
+      print(e.response.headers);
+      print(e.response.request);
+    } else {
+      // Something happened in setting up or sending the request that triggered an Error
+      print(e.request);
+      print(e.message);
+    }
+  }
+  // print("wpUpdloadMedia - response $response");
+
+  return jsonDecode(response.toString());
+}
+
 // wpCreate -
 Future<Map<String, dynamic>> wpCreate(
     Map<String, dynamic> authTokenData, LocalArticle article) async {
@@ -75,6 +129,7 @@ Future<Map<String, dynamic>> wpCreate(
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
+  List<File> articleMedia = article.articleMedia();
 
   // Post request data
   Map requestData = {
@@ -84,6 +139,29 @@ Future<Map<String, dynamic>> wpCreate(
     'format': 'image',
     'status': 'publish',
   };
+
+  // Upload media
+  for (File media in articleMedia) {
+    Map<String, dynamic> mediaResponse =
+        await wpUploadMedia(authTokenData, media.path);
+    if (mediaResponse != null && mediaResponse["media"].length != 0) {
+      String mediaFilename = media.path.split('/').last;
+      int mediaId = mediaResponse['media'].first['ID'];
+      String mediaUrl = mediaResponse['media'].first['URL'];
+
+      // Featured image
+      if (mediaFilename.startsWith('featured')) {
+        requestData['featured_image'] = "$mediaId";
+      } else {
+        // Replace inline image URL's
+        articleContent = articleContent.replaceAll(
+          mediaFilename,
+          mediaUrl,
+        );
+        requestData['content'] = articleContent;
+      }
+    }
+  }
 
   // Site
   String site = Platform.environment['WORDPRESS_SITE'];
@@ -96,10 +174,10 @@ Future<Map<String, dynamic>> wpCreate(
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
-  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   headers['Authorization'] = 'Bearer $accessToken';
+  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 
-  Http.Response response = await Http.post(
+  http.Response response = await http.post(
     url,
     headers: headers,
     body: requestData,
@@ -117,7 +195,7 @@ Future<Map<String, dynamic>> wpCreate(
   return responseData;
 }
 
-// wpCreate -
+// wpUpdate -
 Future<Map<String, dynamic>> wpUpdate(
     Map<String, dynamic> authTokenData, LocalArticle article) async {
   // Access token
@@ -125,6 +203,7 @@ Future<Map<String, dynamic>> wpUpdate(
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
+  List<File> articleMedia = article.articleMedia();
 
   // Post request data
   Map requestData = {
@@ -135,6 +214,29 @@ Future<Map<String, dynamic>> wpUpdate(
     'status': 'publish',
   };
 
+  // Upload media
+  for (File media in articleMedia) {
+    Map<String, dynamic> mediaResponse =
+        await wpUploadMedia(authTokenData, media.path);
+    if (mediaResponse != null && mediaResponse["media"].length != 0) {
+      String mediaFilename = media.path.split('/').last;
+      int mediaId = mediaResponse['media'].first['ID'];
+      String mediaUrl = mediaResponse['media'].first['URL'];
+
+      // Featured image
+      if (mediaFilename.startsWith('featured')) {
+        requestData['featured_image'] = "$mediaId";
+      } else {
+        // Replace inline image URL's
+        articleContent = articleContent.replaceAll(
+          mediaFilename,
+          mediaUrl,
+        );
+        requestData['content'] = articleContent;
+      }
+    }
+  }
+
   int siteId = article.metaSiteId();
   int postId = article.metaPostId();
 
@@ -143,10 +245,10 @@ Future<Map<String, dynamic>> wpUpdate(
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
-  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   headers['Authorization'] = 'Bearer $accessToken';
+  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 
-  Http.Response response = await Http.post(
+  http.Response response = await http.post(
     url,
     headers: headers,
     body: requestData,
@@ -216,8 +318,8 @@ Future<Map<String, dynamic>> wpDelete(
   headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   headers['Authorization'] = 'Bearer $accessToken';
 
-  var client = Http.Client();
-  Http.Response response;
+  var client = http.Client();
+  http.Response response;
   try {
     response = await client.post(
       url,
@@ -256,7 +358,7 @@ Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
   headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   headers['Authorization'] = 'Bearer $accessToken';
 
-  Http.Response response = await Http.get(
+  http.Response response = await http.get(
     url,
     headers: headers,
   );

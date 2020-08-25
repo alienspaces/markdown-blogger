@@ -133,7 +133,16 @@ class LocalArticle {
     String articleContent = articleLines.join("\n");
     // Add a hard line break after all paragraphs
     articleContent = articleContent.replaceAll('</p>', "</p>\n");
+    // Center all images
+    articleContent = articleContent.replaceAll(
+      '<p><img',
+      '<p style="text-align:center"><img',
+    );
     return articleContent;
+  }
+
+  List<File> articleMedia() {
+    return this.mediaFiles;
   }
 
   LocalArticle(
