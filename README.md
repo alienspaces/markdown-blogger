@@ -10,9 +10,9 @@ Currently supports the following blogging platforms:
 
 ## How
 
-* Clone this repository
-* Add `./articles`
-* Export some environment variables
+* Fork this repository.
+* Create an `./articles` directory.
+* Configure the environment.
 * Use the CLI to publish.
 
 ### Articles
@@ -23,17 +23,20 @@ Articles should be placed in their own directory inside an `articles` directory:
 ./articles
 ./articles/20200814/
 ./articles/20200814/the-final-frontier.md
+./articles/20200814/featured.jpeg
 ./articles/20200814/enterprise.jpeg
 ./articles/20200821/
 ./articles/20200821/from-beyond.md
+./articles/20200821/featured.jpeg
 ./articles/20200821/alien.jpeg
 ```
 
 * There should be only one `.md` file per directory.
 * The first `<h1>` tag found after HTML conversion will be used as the article title. If no heading tag can be found then the `.md` file name will be used as the article title.
+* If an image with a name of `featured` exists in the article directory it will be used as the articles "featured image" appearing at the top of the article.
 * A `.meta` file will be created automatically in each article directory to track changes. If you delete this file new posts will be created.
 
-### Environment Variables
+### Configuration
 
 Environment variables are used for configuration making it easy to implement automated publishing with CI pipelines and it keeps all configuration in the one place.
 

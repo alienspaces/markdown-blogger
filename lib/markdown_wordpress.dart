@@ -10,12 +10,29 @@ import 'markdown_blogger.dart';
 class WordpressPost {
   final int id;
   final int siteId;
-  final String title;
-  final String content;
-  final String featuredImage;
+  final String url;
+  final String modified;
 
   WordpressPost(
-      this.id, this.siteId, this.title, this.content, this.featuredImage);
+    this.id,
+    this.siteId,
+    this.url,
+    this.modified,
+  );
+}
+
+class WordpressMedia {
+  final int id;
+  final int siteId;
+  final String url;
+  final String modified;
+
+  WordpressMedia(
+    this.id,
+    this.siteId,
+    this.url,
+    this.modified,
+  );
 }
 
 // wpAuthToken -
@@ -68,8 +85,8 @@ Future<Map<String, dynamic>> wpAuthToken() async {
   return authResponseData;
 }
 
-// wpUploadMedia -
-Future<Map<String, dynamic>> wpUploadMedia(
+// wpCreatePostMedia -
+Future<WordpressMedia> wpCreateMedia(
     Map<String, dynamic> authTokenData, String mediaPath) async {
   // Access token
   String accessToken = authTokenData["access_token"];
@@ -94,7 +111,6 @@ Future<Map<String, dynamic>> wpUploadMedia(
   });
 
   Dio dio = new Dio();
-  // dio.interceptors.add(LogInterceptor(responseBody: false));
   Response response;
 
   try {
@@ -116,20 +132,87 @@ Future<Map<String, dynamic>> wpUploadMedia(
       print(e.message);
     }
   }
-  // print("wpUpdloadMedia - response $response");
 
-  return jsonDecode(response.toString());
+  var mediaResponse = jsonDecode(response.toString());
+  if (mediaResponse['media'] != null) {
+    var mediaData = mediaResponse['media'].first;
+    var wordpressMedia = new WordpressMedia(
+      mediaData['ID'],
+      null,
+      mediaData['URL'],
+      mediaData['date'],
+    );
+    return wordpressMedia;
+  }
+
+  return null;
 }
 
-// wpCreate -
-Future<Map<String, dynamic>> wpCreate(
-    Map<String, dynamic> authTokenData, LocalArticle article) async {
+// wpCreatePostMedia -
+Future<WordpressMedia> wpUpdateMedia(
+    Map<String, dynamic> authTokenData, String mediaPath, int mediaId) async {
+  // Access token
+  String accessToken = authTokenData["access_token"];
+
+  // Site
+  String site = Platform.environment['WORDPRESS_SITE'];
+  if (site.length == 0) {
+    throw new Exception(["WORDPRESS_SITE is required"]);
+  }
+
+  Map<String, String> headers = new HashMap();
+  headers['authorization'] = 'Bearer $accessToken';
+  headers['content-type'] = 'multipart/form-data';
+
+  FormData formData = FormData.fromMap({
+    "media": await MultipartFile.fromFile(
+      mediaPath,
+      filename: mediaPath.split("/").last,
+    ),
+  });
+
+  Dio dio = new Dio();
+  Response response;
+
+  try {
+    response = await dio.post(
+      'https://public-api.wordpress.com/rest/v1.1/sites/$site/media/$mediaId/edit',
+      data: formData,
+      options: Options(
+        headers: headers,
+      ),
+    );
+  } on DioError catch (e) {
+    if (e.response != null) {
+      print(e.response.data);
+      print(e.response.headers);
+      print(e.response.request);
+    } else {
+      // Something happened in setting up or sending the request that triggered an Error
+      print(e.request);
+      print(e.message);
+    }
+    return null;
+  }
+
+  var mediaResponse = jsonDecode(response.toString());
+  var wordpressMedia = new WordpressMedia(
+    mediaResponse['ID'],
+    null,
+    mediaResponse['URL'],
+    mediaResponse['date'],
+  );
+  return wordpressMedia;
+}
+
+// wpCreatePost -
+Future<WordpressPost> wpCreatePost(
+    Map<String, dynamic> authTokenData, Article article, String site) async {
   // Access token
   String accessToken = authTokenData["access_token"];
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
-  List<File> articleMedia = article.articleMedia();
 
   // Post request data
   Map requestData = {
@@ -140,33 +223,9 @@ Future<Map<String, dynamic>> wpCreate(
     'status': 'publish',
   };
 
-  // Upload media
-  for (File media in articleMedia) {
-    Map<String, dynamic> mediaResponse =
-        await wpUploadMedia(authTokenData, media.path);
-    if (mediaResponse != null && mediaResponse["media"].length != 0) {
-      String mediaFilename = media.path.split('/').last;
-      int mediaId = mediaResponse['media'].first['ID'];
-      String mediaUrl = mediaResponse['media'].first['URL'];
-
-      // Featured image
-      if (mediaFilename.startsWith('featured')) {
-        requestData['featured_image'] = "$mediaId";
-      } else {
-        // Replace inline image URL's
-        articleContent = articleContent.replaceAll(
-          mediaFilename,
-          mediaUrl,
-        );
-        requestData['content'] = articleContent;
-      }
-    }
-  }
-
-  // Site
-  String site = Platform.environment['WORDPRESS_SITE'];
-  if (site.length == 0) {
-    throw new Exception(["WORDPRESS_SITE is required"]);
+  // Featured image
+  if (article.featuredImageId != null) {
+    requestData['featured_image'] = "${article.featuredImageId}";
   }
 
   String url =
@@ -185,25 +244,31 @@ Future<Map<String, dynamic>> wpCreate(
   );
 
   if (response.statusCode != 200) {
-    print('wpCreate - status: ${response.statusCode}');
-    print('wpCreate - body: ${response.body}');
+    print('wpCreatePost - status: ${response.statusCode}');
+    print('wpCreatePost - body: ${response.body}');
     return null;
   }
 
   Map<String, dynamic> responseData = jsonDecode(response.body);
 
-  return responseData;
+  WordpressPost wordpressPost = new WordpressPost(
+    responseData['ID'],
+    responseData['site_ID'],
+    responseData['URL'],
+    responseData['modified'],
+  );
+
+  return wordpressPost;
 }
 
-// wpUpdate -
-Future<Map<String, dynamic>> wpUpdate(
-    Map<String, dynamic> authTokenData, LocalArticle article) async {
+// wpUpdatePost -
+Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
+    Article article, String site, int postId) async {
   // Access token
   String accessToken = authTokenData["access_token"];
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
-  List<File> articleMedia = article.articleMedia();
 
   // Post request data
   Map requestData = {
@@ -214,34 +279,13 @@ Future<Map<String, dynamic>> wpUpdate(
     'status': 'publish',
   };
 
-  // Upload media
-  for (File media in articleMedia) {
-    Map<String, dynamic> mediaResponse =
-        await wpUploadMedia(authTokenData, media.path);
-    if (mediaResponse != null && mediaResponse["media"].length != 0) {
-      String mediaFilename = media.path.split('/').last;
-      int mediaId = mediaResponse['media'].first['ID'];
-      String mediaUrl = mediaResponse['media'].first['URL'];
-
-      // Featured image
-      if (mediaFilename.startsWith('featured')) {
-        requestData['featured_image'] = "$mediaId";
-      } else {
-        // Replace inline image URL's
-        articleContent = articleContent.replaceAll(
-          mediaFilename,
-          mediaUrl,
-        );
-        requestData['content'] = articleContent;
-      }
-    }
+  // Featured image
+  if (article.featuredImageId != null) {
+    requestData['featured_image'] = "${article.featuredImageId}";
   }
 
-  int siteId = article.metaSiteId();
-  int postId = article.metaPostId();
-
   String url =
-      "https://public-api.wordpress.com/rest/v1.2/sites/$siteId/posts/$postId";
+      "https://public-api.wordpress.com/rest/v1.2/sites/$site/posts/$postId";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
@@ -256,18 +300,26 @@ Future<Map<String, dynamic>> wpUpdate(
   );
 
   if (response.statusCode != 200) {
-    print('wpUpdate - status: ${response.statusCode}');
-    print('wpUpdate - body: ${response.body}');
+    print('wpUpdatePost - status: ${response.statusCode}');
+    print('wpUpdatePost - body: ${response.body}');
     return null;
   }
 
   Map<String, dynamic> responseData = jsonDecode(response.body);
 
-  return responseData;
+  WordpressPost wordpressPost = new WordpressPost(
+    responseData['ID'],
+    responseData['site_ID'],
+    responseData['URL'],
+    responseData['modified'],
+  );
+
+  return wordpressPost;
 }
 
-// wpDeleteAll - delete all posts
-void wpDeleteAll(Map<String, dynamic> authTokenData) async {
+// wpDeleteAll - delete up to 100 wordpress posts, doesn't do anything with
+// local articles or meta data so is of limited use..
+void wpDeleteAll(Map<String, dynamic> authTokenData, String site) async {
   // Get all posts
   List<WordpressPost> wpPosts = await wpGetAll(authTokenData);
   if (wpPosts.length == 0) {
@@ -279,13 +331,49 @@ void wpDeleteAll(Map<String, dynamic> authTokenData) async {
   // to iterate over this loop syncronously we need to use a for loop
   for (WordpressPost wpPost in wpPosts) {
     print("wpDeleteAll - Deleting post ID ${wpPost.id}");
-    await wpDelete(authTokenData, wpPost);
+    await wpDelete(authTokenData, site, wpPost.id);
   }
 }
 
 // wpDelete - delete a post
 Future<Map<String, dynamic>> wpDelete(
-    Map<String, dynamic> authTokenData, WordpressPost post) async {
+    Map<String, dynamic> authTokenData, String site, int postId) async {
+  // Access token
+  String accessToken = authTokenData["access_token"];
+
+  String url =
+      "https://public-api.wordpress.com/rest/v1.1/sites/$site/posts/$postId/delete";
+
+  Map<String, String> headers = new HashMap();
+  headers['Accept'] = 'application/json';
+  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+  headers['Authorization'] = 'Bearer $accessToken';
+
+  var client = http.Client();
+  http.Response response;
+  try {
+    response = await client.post(
+      url,
+      headers: headers,
+    );
+  } finally {
+    client.close();
+  }
+
+  if (response.statusCode != 200) {
+    print('wpDelete - status: ${response.statusCode}');
+    print('wpDelete - body: ${response.body}');
+    return null;
+  }
+
+  Map<String, dynamic> responseData = jsonDecode(response.body);
+
+  return responseData;
+}
+
+// wpDelete - delete a post
+Future<Map<String, dynamic>> wpDeleteMedia(
+    Map<String, dynamic> authTokenData, WordpressMedia media) async {
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -296,22 +384,22 @@ Future<Map<String, dynamic>> wpDelete(
     return null;
   }
 
-  // Post ID
-  int postId = post.id;
-  if (postId == null) {
+  // Media ID
+  int mediaId = media.id;
+  if (mediaId == null) {
     print("wpDelete - post ID not defined");
     return null;
   }
 
   // Site ID
-  int siteId = post.siteId;
+  int siteId = media.siteId;
   if (siteId == null) {
     print("wpDelete - site ID not defined");
     return null;
   }
 
   String url =
-      "https://public-api.wordpress.com/rest/v1.1/sites/$siteId/posts/$postId/delete";
+      "https://public-api.wordpress.com/rest/v1.1/sites/$siteId/media/$mediaId/delete";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
@@ -376,9 +464,8 @@ Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
     WordpressPost wpPost = new WordpressPost(
       post['ID'],
       post['site_ID'],
-      post['title'],
-      post['content'],
-      post['featured_image'],
+      post['URL'],
+      post['modified'],
     );
     wpPosts.add(wpPost);
   });
