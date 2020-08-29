@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:markdown/markdown.dart';
 
 // Article -
@@ -12,8 +13,11 @@ class Article {
   String _html;
 
   String articleHTML() {
+    // Logger
+    final log = Logger('articleHTML');
+
     if (this.articleFile == null) {
-      print("articleHTML - error, articleFile is null");
+      log.warning("articleHTML - error, articleFile is null");
       return null;
     }
     if (this._html == null) {
@@ -23,26 +27,40 @@ class Article {
   }
 
   String articleReplace(String replaceString, String withString) {
+    // Logger
+    final log = Logger('articleReplace');
+
     if (this._html == null) {
       this._html = markdownToHtml(this.articleFile.readAsStringSync());
     }
-    print("articleReplaceURL - replace $replaceString");
-    print("articleReplaceURL - with $withString");
+
+    log.fine("articleReplaceURL - replace $replaceString");
+    log.fine("articleReplaceURL - with $withString");
+
     this._html = this._html.replaceAll(replaceString, withString);
+
     return this._html;
   }
 
   String articleTitle() {
+    // Logger
+    final log = Logger('articleTitle');
+
     // Try to get title from <h1> title in content
     String articleTitle = this.articleTitleFromContent();
     if (articleTitle == null) {
       articleTitle = this.articleTitleFromFilename();
     }
 
+    log.fine("$articleTitle");
+
     return articleTitle;
   }
 
   String articleTitleFromContent() {
+    // Logger
+    final log = Logger('articleTitleFromContent');
+
     String articleTitle;
     List<String> articleLines = this.articleHTML().split("\n");
     if (articleLines.first.startsWith('<h1>')) {
@@ -52,12 +70,18 @@ class Article {
       articleTitle = articleTitle.replaceAll('_', ' ');
       articleTitle = articleTitle.toUpperCase();
     }
+
+    log.fine("$articleTitle");
+
     return articleTitle;
   }
 
   String articleTitleFromFilename() {
+    // Logger
+    final log = Logger('articleTitleFromFilename');
+
     if (this.articleFile == null) {
-      print("articleTitleFromFilename - error, articleFile is null");
+      log.warning("articleTitleFromFilename - error, articleFile is null");
       return null;
     }
 
@@ -68,10 +92,15 @@ class Article {
     articleTitle = articleTitle.replaceAll('_', ' ');
     articleTitle = articleTitle.toUpperCase();
 
+    log.fine("$articleTitle");
+
     return articleTitle;
   }
 
   String articleContent() {
+    // Logger
+    final log = Logger('articleContent');
+
     // Remove initial title if it exists
     List<String> articleLines = this.articleHTML().split("\n");
     if (articleLines.first.startsWith('<h1>')) {
@@ -85,6 +114,9 @@ class Article {
       '<p><img',
       '<p style="text-align:center"><img',
     );
+
+    log.fine("$articleContent");
+
     return articleContent;
   }
 
@@ -119,12 +151,15 @@ class Article {
 
 // getArticles - returns a list of local articles for site
 List<Article> getArticles() {
+  // Logger
+  final log = Logger('getArticles');
+
   // Articles directory for site
   var articleDir = new Directory("./articles");
 
   // Check the directory exists or return
   if (articleDir.existsSync() != true) {
-    print("getArticles - Missing articles directory");
+    log.warning("getArticles - Missing articles directory");
     return null;
   }
 

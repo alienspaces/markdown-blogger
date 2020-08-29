@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
 import 'markdown_blogger.dart';
 
@@ -37,6 +38,9 @@ class WordpressMedia {
 
 // wpAuthToken -
 Future<Map<String, dynamic>> wpAuthToken() async {
+  // Logger
+  final log = Logger('wpAuthToken');
+
   // Source configuration from environment
   String clientID = Platform.environment['WORDPRESS_CLIENT_ID'];
   if (clientID == null) {
@@ -75,8 +79,8 @@ Future<Map<String, dynamic>> wpAuthToken() async {
       encoding: Encoding.getByName('utf-8'));
 
   if (response.statusCode != 200) {
-    print('wpAuthToken - status: ${response.statusCode}');
-    print('wpAuthToken - body: ${response.body}');
+    log.info('wpAuthToken - status: ${response.statusCode}');
+    log.info('wpAuthToken - body: ${response.body}');
     return null;
   }
 
@@ -88,6 +92,9 @@ Future<Map<String, dynamic>> wpAuthToken() async {
 // wpCreatePostMedia -
 Future<WordpressMedia> wpCreateMedia(
     Map<String, dynamic> authTokenData, String mediaPath) async {
+  // Logger
+  final log = Logger('wpCreateMedia');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -123,13 +130,13 @@ Future<WordpressMedia> wpCreateMedia(
     );
   } on DioError catch (e) {
     if (e.response != null) {
-      print(e.response.data);
-      print(e.response.headers);
-      print(e.response.request);
+      log.info(e.response.data);
+      log.info(e.response.headers);
+      log.info(e.response.request);
     } else {
       // Something happened in setting up or sending the request that triggered an Error
-      print(e.request);
-      print(e.message);
+      log.info(e.request);
+      log.info(e.message);
     }
   }
 
@@ -151,6 +158,9 @@ Future<WordpressMedia> wpCreateMedia(
 // wpCreatePostMedia -
 Future<WordpressMedia> wpUpdateMedia(
     Map<String, dynamic> authTokenData, String mediaPath, int mediaId) async {
+  // Logger
+  final log = Logger('wpUpdateMedia');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -184,13 +194,13 @@ Future<WordpressMedia> wpUpdateMedia(
     );
   } on DioError catch (e) {
     if (e.response != null) {
-      print(e.response.data);
-      print(e.response.headers);
-      print(e.response.request);
+      log.info(e.response.data);
+      log.info(e.response.headers);
+      log.info(e.response.request);
     } else {
       // Something happened in setting up or sending the request that triggered an Error
-      print(e.request);
-      print(e.message);
+      log.info(e.request);
+      log.info(e.message);
     }
     return null;
   }
@@ -208,6 +218,9 @@ Future<WordpressMedia> wpUpdateMedia(
 // wpCreatePost -
 Future<WordpressPost> wpCreatePost(
     Map<String, dynamic> authTokenData, Article article, String site) async {
+  // Logger
+  final log = Logger('wpCreatePost');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -244,8 +257,8 @@ Future<WordpressPost> wpCreatePost(
   );
 
   if (response.statusCode != 200) {
-    print('wpCreatePost - status: ${response.statusCode}');
-    print('wpCreatePost - body: ${response.body}');
+    log.info('wpCreatePost - status: ${response.statusCode}');
+    log.info('wpCreatePost - body: ${response.body}');
     return null;
   }
 
@@ -264,6 +277,9 @@ Future<WordpressPost> wpCreatePost(
 // wpUpdatePost -
 Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
     Article article, String site, int postId) async {
+  // Logger
+  final log = Logger('wpUpdatePost');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -300,8 +316,8 @@ Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
   );
 
   if (response.statusCode != 200) {
-    print('wpUpdatePost - status: ${response.statusCode}');
-    print('wpUpdatePost - body: ${response.body}');
+    log.info('wpUpdatePost - status: ${response.statusCode}');
+    log.info('wpUpdatePost - body: ${response.body}');
     return null;
   }
 
@@ -320,17 +336,20 @@ Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
 // wpDeleteAll - delete up to 100 wordpress posts, doesn't do anything with
 // local articles or meta data so is of limited use..
 void wpDeleteAll(Map<String, dynamic> authTokenData, String site) async {
+  // Logger
+  final log = Logger('wpDeleteAll');
+
   // Get all posts
   List<WordpressPost> wpPosts = await wpGetAll(authTokenData);
   if (wpPosts.length == 0) {
-    print("wpDeleteAll - No posts to delete");
+    log.info("wpDeleteAll - No posts to delete");
     return;
   }
 
   // NOTE: forEach does not look at the return value to if we want
   // to iterate over this loop syncronously we need to use a for loop
   for (WordpressPost wpPost in wpPosts) {
-    print("wpDeleteAll - Deleting post ID ${wpPost.id}");
+    log.info("wpDeleteAll - Deleting post ID ${wpPost.id}");
     await wpDelete(authTokenData, site, wpPost.id);
   }
 }
@@ -338,6 +357,9 @@ void wpDeleteAll(Map<String, dynamic> authTokenData, String site) async {
 // wpDelete - delete a post
 Future<Map<String, dynamic>> wpDelete(
     Map<String, dynamic> authTokenData, String site, int postId) async {
+  // Logger
+  final log = Logger('wpDelete');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -361,8 +383,8 @@ Future<Map<String, dynamic>> wpDelete(
   }
 
   if (response.statusCode != 200) {
-    print('wpDelete - status: ${response.statusCode}');
-    print('wpDelete - body: ${response.body}');
+    log.info('wpDelete - status: ${response.statusCode}');
+    log.info('wpDelete - body: ${response.body}');
     return null;
   }
 
@@ -374,27 +396,30 @@ Future<Map<String, dynamic>> wpDelete(
 // wpDelete - delete a post
 Future<Map<String, dynamic>> wpDeleteMedia(
     Map<String, dynamic> authTokenData, WordpressMedia media) async {
+  // Logger
+  final log = Logger('wpDeleteMedia');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
   // Site
   String site = Platform.environment['WORDPRESS_SITE'];
   if (site.length == 0) {
-    print("wpDelete - WORDPRESS_SITE not defined");
+    log.info("wpDelete - WORDPRESS_SITE not defined");
     return null;
   }
 
   // Media ID
   int mediaId = media.id;
   if (mediaId == null) {
-    print("wpDelete - post ID not defined");
+    log.info("wpDelete - post ID not defined");
     return null;
   }
 
   // Site ID
   int siteId = media.siteId;
   if (siteId == null) {
-    print("wpDelete - site ID not defined");
+    log.info("wpDelete - site ID not defined");
     return null;
   }
 
@@ -418,8 +443,8 @@ Future<Map<String, dynamic>> wpDeleteMedia(
   }
 
   if (response.statusCode != 200) {
-    print('wpDelete - status: ${response.statusCode}');
-    print('wpDelete - body: ${response.body}');
+    log.info('wpDelete - status: ${response.statusCode}');
+    log.info('wpDelete - body: ${response.body}');
     return null;
   }
 
@@ -430,6 +455,9 @@ Future<Map<String, dynamic>> wpDeleteMedia(
 
 // wpGetAll - returns all posts for a site
 Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
+  // Logger
+  final log = Logger('wpGetAll');
+
   // Access token
   String accessToken = authTokenData["access_token"];
 
@@ -452,8 +480,8 @@ Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
   );
 
   if (response.statusCode != 200) {
-    print('wpGetAll - Response status: ${response.statusCode}');
-    print('wpGetAll - Response body: ${response.body}');
+    log.info('wpGetAll - Response status: ${response.statusCode}');
+    log.info('wpGetAll - Response body: ${response.body}');
     return null;
   }
 

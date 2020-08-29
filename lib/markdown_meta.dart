@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:logging/logging.dart';
+
 class MetaData {
   int id;
   int siteId;
@@ -20,13 +22,16 @@ class Meta {
   List<MetaData> mediaMeta;
 
   MetaData getMeta(String localPath) {
-    print("getMeta - Finding localPath $localPath");
+    // Logger
+    final log = Logger('getMeta');
+
+    log.fine("getMeta - Finding localPath $localPath");
     if (this.articleMeta != null && this.articleMeta.localPath == localPath) {
       return this.articleMeta;
     }
     if (this.mediaMeta != null) {
       for (var mediaMeta in this.mediaMeta) {
-        print("getMeta - checking media localPath ${mediaMeta.localPath}");
+        log.fine("getMeta - checking media localPath ${mediaMeta.localPath}");
         if (mediaMeta.localPath == localPath) {
           return mediaMeta;
         }
@@ -40,18 +45,25 @@ class Meta {
   }
 
   void addMediaMeta(MetaData mediaMeta) {
+    // Logger
+    final log = Logger('addMediaMeta');
+
     if (this.mediaMeta == null) {
       this.mediaMeta = [];
     }
-    print("addMediaMeta - adding media meta ${mediaMeta.localPath}");
+    log.fine("addMediaMeta - adding media meta ${mediaMeta.localPath}");
     this.mediaMeta.add(mediaMeta);
   }
 
   void updateMediaMeta(MetaData mediaMeta) {
+    // Logger
+    final log = Logger('updateMediaMeta');
+
     int idx = 0;
     for (var metaData in this.mediaMeta) {
       if (metaData.id == mediaMeta.id) {
-        print("updateMediaMeta - updating media meta ${mediaMeta.localPath}");
+        log.fine(
+            "updateMediaMeta - updating media meta ${mediaMeta.localPath}");
         this.mediaMeta[idx] = mediaMeta;
         break;
       }
@@ -60,6 +72,9 @@ class Meta {
   }
 
   void saveFile() {
+    // Logger
+    final log = Logger('saveFile');
+
     Map<String, dynamic> articleMetaData = {
       'id': this.articleMeta.id,
       'siteId': this.articleMeta.siteId,
@@ -82,7 +97,7 @@ class Meta {
       'article': articleMetaData,
       'media': mediaMetaData,
     };
-    print("saveFile - saving meta $metaData");
+    log.fine("saveFile - saving meta $metaData");
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
     this.file.writeAsStringSync(encoder.convert(metaData));
   }
