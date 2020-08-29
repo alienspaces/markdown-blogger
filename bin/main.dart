@@ -121,7 +121,7 @@ void publishArticles() async {
         log.info("Created media URL ${wordpressMedia.url}");
 
         // Add meta for new media
-        var mediaMeta = new MetaData(
+        mediaMeta = new MetaData(
           wordpressMedia.id,
           wordpressMedia.siteId,
           wordpressMedia.url,
@@ -135,20 +135,30 @@ void publishArticles() async {
       if (mediaFile.path.split('/').last.startsWith('featured')) {
         article.featuredImageId = mediaMeta.id;
       }
-    }
 
-    // TODO: Delete remote files defined in meta media that don't exist anymore
-
-    // For each of the meta media data:
-    // - If the article media file does not exist then delete the remote file
-    //   and remove the meta
-
-    // Replace article URL's with actual media meta URLS's
-    for (var mediaMeta in meta.mediaMeta) {
+      // Replace article URL's with actual media meta URLS's
       var filename = mediaMeta.localPath.split('/').last;
       var url = mediaMeta.url;
-      article.articleReplace(filename, url);
+      article.articleReplaceURL(filename, url);
     }
+
+    // Remove media that is not used in the article anymore
+    List<MetaData>.from(meta.mediaMeta).forEach((MetaData mediaMeta) {
+      // Skip featured
+      if (mediaMeta.localPath.split('/').last.startsWith('featured')) {
+        return;
+      }
+
+      var url = mediaMeta.url;
+      if (article.articleContainsURL(url)) {
+        return;
+      }
+      wpDeleteMedia(
+        authTokenData,
+        mediaMeta.id,
+      );
+      meta.deleteMediaMeta(mediaMeta);
+    });
 
     // Update or create remote article post
     WordpressPost wordpressPost;

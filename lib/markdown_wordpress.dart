@@ -215,6 +215,55 @@ Future<WordpressMedia> wpUpdateMedia(
   return wordpressMedia;
 }
 
+// wpDeleteMedia -
+Future<void> wpDeleteMedia(
+    Map<String, dynamic> authTokenData, int mediaId) async {
+  // Logger
+  final log = Logger('wpDeleteMedia');
+
+  // Access token
+  String accessToken = authTokenData["access_token"];
+
+  // Site
+  String site = Platform.environment['WORDPRESS_SITE'];
+  if (site.length == 0) {
+    throw new Exception(["WORDPRESS_SITE is required"]);
+  }
+
+  Map<String, String> headers = new HashMap();
+  headers['authorization'] = 'Bearer $accessToken';
+  headers['content-type'] = 'multipart/form-data';
+
+  Dio dio = new Dio();
+  Response response;
+
+  try {
+    response = await dio.post(
+      'https://public-api.wordpress.com/rest/v1.1/sites/$site/media/$mediaId/delete',
+      options: Options(
+        headers: headers,
+      ),
+    );
+  } on DioError catch (e) {
+    if (e.response != null) {
+      log.info(e.response.data);
+      log.info(e.response.headers);
+      log.info(e.response.request);
+    } else {
+      // Something happened in setting up or sending the request that triggered an Error
+      log.info(e.request);
+      log.info(e.message);
+    }
+    return null;
+  }
+
+  Map<String, dynamic> responseData = jsonDecode(response.toString());
+
+  log.info("Response status ${responseData['status']}");
+
+  return null;
+}
+
 // wpCreatePost -
 Future<WordpressPost> wpCreatePost(
     Map<String, dynamic> authTokenData, Article article, String site) async {
@@ -365,66 +414,6 @@ Future<Map<String, dynamic>> wpDelete(
 
   String url =
       "https://public-api.wordpress.com/rest/v1.1/sites/$site/posts/$postId/delete";
-
-  Map<String, String> headers = new HashMap();
-  headers['Accept'] = 'application/json';
-  headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-  headers['Authorization'] = 'Bearer $accessToken';
-
-  var client = http.Client();
-  http.Response response;
-  try {
-    response = await client.post(
-      url,
-      headers: headers,
-    );
-  } finally {
-    client.close();
-  }
-
-  if (response.statusCode != 200) {
-    log.info('wpDelete - status: ${response.statusCode}');
-    log.info('wpDelete - body: ${response.body}');
-    return null;
-  }
-
-  Map<String, dynamic> responseData = jsonDecode(response.body);
-
-  return responseData;
-}
-
-// wpDelete - delete a post
-Future<Map<String, dynamic>> wpDeleteMedia(
-    Map<String, dynamic> authTokenData, WordpressMedia media) async {
-  // Logger
-  final log = Logger('wpDeleteMedia');
-
-  // Access token
-  String accessToken = authTokenData["access_token"];
-
-  // Site
-  String site = Platform.environment['WORDPRESS_SITE'];
-  if (site.length == 0) {
-    log.info("wpDelete - WORDPRESS_SITE not defined");
-    return null;
-  }
-
-  // Media ID
-  int mediaId = media.id;
-  if (mediaId == null) {
-    log.info("wpDelete - post ID not defined");
-    return null;
-  }
-
-  // Site ID
-  int siteId = media.siteId;
-  if (siteId == null) {
-    log.info("wpDelete - site ID not defined");
-    return null;
-  }
-
-  String url =
-      "https://public-api.wordpress.com/rest/v1.1/sites/$siteId/media/$mediaId/delete";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';

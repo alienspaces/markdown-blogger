@@ -51,7 +51,7 @@ class Meta {
     if (this.mediaMeta == null) {
       this.mediaMeta = [];
     }
-    log.fine("addMediaMeta - adding media meta ${mediaMeta.localPath}");
+    log.fine("Adding media meta ${mediaMeta.localPath}");
     this.mediaMeta.add(mediaMeta);
   }
 
@@ -62,13 +62,34 @@ class Meta {
     int idx = 0;
     for (var metaData in this.mediaMeta) {
       if (metaData.id == mediaMeta.id) {
-        log.fine(
-            "updateMediaMeta - updating media meta ${mediaMeta.localPath}");
+        log.fine("Updating media meta ${mediaMeta.localPath}");
         this.mediaMeta[idx] = mediaMeta;
         break;
       }
       idx++;
     }
+  }
+
+  void deleteMediaMeta(MetaData deleteMediaMeta) {
+    // Logger
+    final log = Logger('deleteMediaMeta');
+
+    int idx = 0;
+    bool found = false;
+    List<MetaData> mediaMeta = this.mediaMeta;
+
+    for (var metaData in mediaMeta) {
+      if (metaData.id == deleteMediaMeta.id) {
+        log.fine("Deleting media meta ${deleteMediaMeta.localPath}");
+        found = true;
+        break;
+      }
+      idx++;
+    }
+    if (found) {
+      mediaMeta.removeAt(idx);
+    }
+    this.mediaMeta = mediaMeta;
   }
 
   void saveFile() {

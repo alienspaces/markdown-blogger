@@ -26,20 +26,38 @@ class Article {
     return this._html;
   }
 
-  String articleReplace(String replaceString, String withString) {
+  String articleReplaceURL(String replaceURL, String withURL) {
     // Logger
-    final log = Logger('articleReplace');
+    final log = Logger('articleReplaceURL');
 
     if (this._html == null) {
       this._html = markdownToHtml(this.articleFile.readAsStringSync());
     }
 
-    log.fine("articleReplaceURL - replace $replaceString");
-    log.fine("articleReplaceURL - with $withString");
+    log.fine("Replace $replaceURL");
+    log.fine("With $withURL");
 
-    this._html = this._html.replaceAll(replaceString, withString);
+    var html = this.articleHTML();
+    this._html = html.replaceAll(replaceURL, withURL);
 
     return this._html;
+  }
+
+  bool articleContainsURL(String containsURL) {
+    // Logger
+    final log = Logger('articleContainsURL');
+
+    if (this._html == null) {
+      this._html = markdownToHtml(this.articleFile.readAsStringSync());
+    }
+
+    var html = this.articleHTML();
+
+    var contains = html.contains(containsURL);
+
+    log.fine("Contains HTML $html URL $containsURL contains ${contains}");
+
+    return contains;
   }
 
   String articleTitle() {
@@ -81,7 +99,7 @@ class Article {
     final log = Logger('articleTitleFromFilename');
 
     if (this.articleFile == null) {
-      log.warning("articleTitleFromFilename - error, articleFile is null");
+      log.warning("Error, articleFile is null");
       return null;
     }
 
