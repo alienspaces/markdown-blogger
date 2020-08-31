@@ -32,7 +32,8 @@ Articles should be placed in their own directory inside an `articles` directory:
 ```
 
 * There should be only one `.md` file per directory.
-* The first `<h1>` tag found after HTML conversion will be used as the article title. If no heading tag can be found then the `.md` file name will be used as the article title.
+* A `<h1>` tag found on the first row after HTML conversion will be used as the article title. If not found then the `.md` file name will be used as the article title.
+* The first `<blockquote>` or `<p>` element will be used as the article excerpt.
 * If an image with a name of `featured` exists in the article directory it will be used as the articles "featured image" appearing at the top of the article.
 * A `.meta` file will be created automatically in each article directory to track changes. If you delete this file new posts will be created.
 
