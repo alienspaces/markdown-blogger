@@ -115,6 +115,53 @@ class Article {
     return articleTitle;
   }
 
+  String articleExcerpt() {
+    // Logger
+    final log = Logger('articleExcerpt');
+
+    // Remove initial title if it exists
+    List<String> htmlLines = this.articleHTML().split("\n");
+
+    String articleExcerpt = "";
+    bool collecting = false;
+    for (var htmlLine in htmlLines) {
+      log.fine("Checking HTML $htmlLine");
+      if (collecting) {
+        articleExcerpt = articleExcerpt + htmlLine;
+      }
+      // Find the first blockquote
+      if (htmlLine.startsWith('<blockquote>')) {
+        articleExcerpt = articleExcerpt + htmlLine;
+        collecting = true;
+      }
+      // Find the closing blockquote
+      if (collecting && htmlLine.endsWith('</blockquote>')) {
+        articleExcerpt = articleExcerpt + htmlLine;
+        collecting = false;
+        break;
+      }
+    }
+
+    // When no blockquotes to use are excerpt use the first paragraph.
+    if (articleExcerpt == "") {
+      for (var htmlLine in htmlLines) {
+        log.fine("Checking HTML $htmlLine");
+        // Find the first paragraph
+        if (htmlLine.startsWith('<p>')) {
+          articleExcerpt = htmlLine;
+          break;
+        }
+      }
+    }
+
+    var match = RegExp(r"\<.*?\>");
+    articleExcerpt = articleExcerpt.replaceAll(match, '');
+
+    log.fine("Using HTML $articleExcerpt");
+
+    return articleExcerpt;
+  }
+
   String articleContent() {
     // Logger
     final log = Logger('articleContent');

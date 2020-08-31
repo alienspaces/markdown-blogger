@@ -134,7 +134,6 @@ Future<WordpressMedia> wpCreateMedia(
       log.info(e.response.headers);
       log.info(e.response.request);
     } else {
-      // Something happened in setting up or sending the request that triggered an Error
       log.info(e.request);
       log.info(e.message);
     }
@@ -198,7 +197,6 @@ Future<WordpressMedia> wpUpdateMedia(
       log.info(e.response.headers);
       log.info(e.response.request);
     } else {
-      // Something happened in setting up or sending the request that triggered an Error
       log.info(e.request);
       log.info(e.message);
     }
@@ -250,7 +248,6 @@ Future<void> wpDeleteMedia(
       log.info(e.response.headers);
       log.info(e.response.request);
     } else {
-      // Something happened in setting up or sending the request that triggered an Error
       log.info(e.request);
       log.info(e.message);
     }
@@ -275,11 +272,13 @@ Future<WordpressPost> wpCreatePost(
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
+  String articleExcerpt = article.articleExcerpt();
 
   // Post request data
   Map requestData = {
     'title': articleTitle,
     'content': articleContent,
+    'excerpt': articleExcerpt,
     'context': 'html',
     'format': 'image',
     'status': 'publish',
@@ -288,6 +287,8 @@ Future<WordpressPost> wpCreatePost(
   // Featured image
   if (article.featuredImageId != null) {
     requestData['featured_image'] = "${article.featuredImageId}";
+  } else {
+    requestData['featured_image'] = "";
   }
 
   String url =
@@ -334,11 +335,13 @@ Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
 
   String articleTitle = article.articleTitle();
   String articleContent = article.articleContent();
+  String articleExcerpt = article.articleExcerpt();
 
   // Post request data
   Map requestData = {
     'title': articleTitle,
     'content': articleContent,
+    'excerpt': articleExcerpt,
     'context': 'html',
     'format': 'image',
     'status': 'publish',

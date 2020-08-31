@@ -73,17 +73,8 @@ void publishArticles() async {
     // Get article meta
     var meta = new Meta(article.metaFile);
 
-    // Each "article" object has a list of all the files that are currently in
-    // the article directory.
-    // The "meta" object contains any current meta data for files that are
-    // currently or have once been in the article directory
-
-    // For each of the article files:
-    // - If meta data exists then we update the remote file
-    // - If meta data does not exist then we create the remote file
-
-    // We need to cycle through article media files first as the article
-    // content itself will need updated media URL's
+    // Cycle through article media files first as the article content will
+    // need the updated media URL's
     for (var mediaFile in article.mediaFiles) {
       var mediaMeta = meta.getMeta(mediaFile.path);
 
@@ -91,8 +82,10 @@ void publishArticles() async {
       if (mediaMeta != null) {
         // Check modified
         DateTime localModified = mediaFile.lastModifiedSync().toUtc();
-        DateTime remoteModified = DateTime.parse(mediaMeta.modified);
-        if (localModified.isAfter(remoteModified)) {
+        DateTime metaModified = DateTime.parse(mediaMeta.modified).toUtc();
+        log.fine("localModified ${localModified.toString()}");
+        log.fine("metaModified ${metaModified.toString()}");
+        if (localModified.isAfter(metaModified)) {
           log.info("Updating id ${mediaMeta.id}");
           log.info("Updating media ${mediaFile.path}");
 
@@ -104,6 +97,7 @@ void publishArticles() async {
           );
           log.info("Updated media ID ${wordpressMedia.id}");
           log.info("Updated media URL ${wordpressMedia.url}");
+          log.info("Updated media URL ${wordpressMedia.modified}");
 
           // Update meta with new modified time
           mediaMeta.modified = wordpressMedia.modified;
