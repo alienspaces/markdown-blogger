@@ -86,8 +86,8 @@ void publishArticles() async {
         log.fine("localModified ${localModified.toString()}");
         log.fine("metaModified ${metaModified.toString()}");
         if (localModified.isAfter(metaModified)) {
-          log.info("Updating id ${mediaMeta.id}");
-          log.info("Updating media ${mediaFile.path}");
+          log.info("Updating media ID ${mediaMeta.id}");
+          log.info("Updating media path ${mediaFile.path}");
 
           // Update remote media if local media is newer
           var wordpressMedia = await wpUpdateMedia(
@@ -97,7 +97,7 @@ void publishArticles() async {
           );
           log.info("Updated media ID ${wordpressMedia.id}");
           log.info("Updated media URL ${wordpressMedia.url}");
-          log.info("Updated media URL ${wordpressMedia.modified}");
+          log.info("Updated media modified ${wordpressMedia.modified}");
 
           // Update meta with new modified time
           mediaMeta.modified = wordpressMedia.modified;
@@ -113,6 +113,7 @@ void publishArticles() async {
         );
         log.info("Created media ID ${wordpressMedia.id}");
         log.info("Created media URL ${wordpressMedia.url}");
+        log.info("Created media modified ${wordpressMedia.modified}");
 
         // Add meta for new media
         mediaMeta = new MetaData(

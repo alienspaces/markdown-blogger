@@ -69,9 +69,11 @@ To publish articles manually or via your CI pipeline:
 
 ## Why
 
-I wanted to learn:
+As a developer:
 
-* The [Dart](https://dart.dev/guides) programming language
-* The origins and creative process behind monsters in games
+* I wanted to learn the [Dart](https://dart.dev/guides) programming language
+* Make blogging about my favourite things easier
 
-So how about I write regular articles about monsters and then [publish](https://monsterweekly.com) those articles using a tool I built with [Dart](https://dart.dev/guides).
+So now I can collect information or write about stuff and then [publish](https://monsterweekly.com) those articles using a tool I built with [Dart](https://dart.dev/guides).
+
+Cool!
