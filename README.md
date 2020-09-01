@@ -31,6 +31,8 @@ Articles should be placed in their own directory inside an `articles` directory:
 ./articles/20200821/alien.jpeg
 ```
 
+(__See the provided example articles in the repository__)
+
 * There should be only one `.md` file per directory.
 * A `<h1>` tag found on the first row after HTML conversion will be used as the article title. If not found then the `.md` file name will be used as the article title.
 * The first `<blockquote>` or `<p>` element will be used as the article excerpt.
