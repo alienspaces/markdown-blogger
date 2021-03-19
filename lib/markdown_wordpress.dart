@@ -74,9 +74,7 @@ Future<Map<String, dynamic>> wpAuthToken() async {
   headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 
   http.Response response = await http.post(url,
-      headers: headers,
-      body: authRequestData,
-      encoding: Encoding.getByName('utf-8'));
+      headers: headers, body: authRequestData, encoding: Encoding.getByName('utf-8'));
 
   if (response.statusCode != 200) {
     log.info('wpAuthToken - status: ${response.statusCode}');
@@ -90,8 +88,7 @@ Future<Map<String, dynamic>> wpAuthToken() async {
 }
 
 // wpCreatePostMedia -
-Future<WordpressMedia> wpCreateMedia(
-    Map<String, dynamic> authTokenData, String mediaPath) async {
+Future<WordpressMedia> wpCreateMedia(Map<String, dynamic> authTokenData, String mediaPath) async {
   // Logger
   final log = Logger('wpCreateMedia');
 
@@ -214,8 +211,7 @@ Future<WordpressMedia> wpUpdateMedia(
 }
 
 // wpDeleteMedia -
-Future<void> wpDeleteMedia(
-    Map<String, dynamic> authTokenData, int mediaId) async {
+Future<void> wpDeleteMedia(Map<String, dynamic> authTokenData, int mediaId) async {
   // Logger
   final log = Logger('wpDeleteMedia');
 
@@ -291,8 +287,7 @@ Future<WordpressPost> wpCreatePost(
     requestData['featured_image'] = "";
   }
 
-  String url =
-      "https://public-api.wordpress.com/rest/v1.2/sites/$site/posts/new";
+  String url = "https://public-api.wordpress.com/rest/v1.2/sites/$site/posts/new";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
@@ -325,8 +320,8 @@ Future<WordpressPost> wpCreatePost(
 }
 
 // wpUpdatePost -
-Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
-    Article article, String site, int postId) async {
+Future<WordpressPost> wpUpdatePost(
+    Map<String, dynamic> authTokenData, Article article, String site, int postId) async {
   // Logger
   final log = Logger('wpUpdatePost');
 
@@ -352,8 +347,7 @@ Future<WordpressPost> wpUpdatePost(Map<String, dynamic> authTokenData,
     requestData['featured_image'] = "${article.featuredImageId}";
   }
 
-  String url =
-      "https://public-api.wordpress.com/rest/v1.2/sites/$site/posts/$postId";
+  String url = "https://public-api.wordpress.com/rest/v1.2/sites/$site/posts/$postId";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
@@ -415,8 +409,7 @@ Future<Map<String, dynamic>> wpDelete(
   // Access token
   String accessToken = authTokenData["access_token"];
 
-  String url =
-      "https://public-api.wordpress.com/rest/v1.1/sites/$site/posts/$postId/delete";
+  String url = "https://public-api.wordpress.com/rest/v1.1/sites/$site/posts/$postId/delete";
 
   Map<String, String> headers = new HashMap();
   headers['Accept'] = 'application/json';
@@ -479,7 +472,7 @@ Future<List<WordpressPost>> wpGetAll(Map<String, dynamic> authTokenData) async {
 
   Map<String, dynamic> responseData = jsonDecode(response.body);
   List<dynamic> posts = responseData['posts'];
-  List<WordpressPost> wpPosts = new List<WordpressPost>();
+  List<WordpressPost> wpPosts = <WordpressPost>[];
   posts.forEach((post) {
     WordpressPost wpPost = new WordpressPost(
       post['ID'],

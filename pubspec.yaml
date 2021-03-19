@@ -1,4 +1,6 @@
 name: markdown_blogger
+environment:
+  sdk: '>=2.10.0 <3.0.0'
 dependencies:
   args: ^1.6.0
   markdown: ^2.1.7

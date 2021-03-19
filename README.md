@@ -76,6 +76,6 @@ As a developer:
 * I wanted to learn the [Dart](https://dart.dev/guides) programming language
 * Make blogging about my favourite things easier
 
-So now I can collect information or write about stuff and then [publish](https://monsterweekly.com) those articles using a tool I built with [Dart](https://dart.dev/guides).
+So now I can collect information or write about stuff and then [publish](https://alienspaces.com) those articles using a tool I built with [Dart](https://dart.dev/guides).
 
 Cool!
