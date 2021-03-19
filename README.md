@@ -12,8 +12,11 @@ Currently supports the following blogging platforms:
 
 * Fork this repository.
 * Create an `./articles` directory.
+  * See explanation below.
 * Configure the environment.
+  * `dart pub get`
 * Use the CLI to publish.
+  * `./script/publish`
 
 ### Articles
 

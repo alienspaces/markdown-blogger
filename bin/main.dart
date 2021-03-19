@@ -14,8 +14,7 @@ Future<void> main(List<String> arguments) async {
   // Logging
   Logger.root.level = Level.INFO;
   Logger.root.onRecord.listen((record) {
-    print(
-        '${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
+    print('${record.level.name}: ${record.time}: ${record.loggerName}: ${record.message}');
   });
 
   // Logger
@@ -44,14 +43,14 @@ Future<void> main(List<String> arguments) async {
   log.info("Main - Done");
 }
 
-void publishArticles() async {
+Future<void> publishArticles() async {
   // Logger
   final log = Logger('publishArticles');
 
   // Get auth token data
   var authTokenData = await wpAuthToken();
-  if (authTokenData == null) {
-    log.warning("authTokenData is null");
+  if (authTokenData.isEmpty) {
+    log.warning("authTokenData is empty");
     return null;
   }
 
@@ -64,7 +63,7 @@ void publishArticles() async {
 
   // Get articles
   var articles = getArticles();
-  if (articles == null) {
+  if (articles.isEmpty) {
     log.warning("No articles found");
     return;
   }
@@ -206,7 +205,7 @@ void publishArticles() async {
 
 // deleteArticles - deletes all articles and associated media, keeps all local
 // files but removes the .meta file
-void deleteArticles() async {
+Future<void> deleteArticles() async {
   // Logger
   final log = Logger('deleteArticles');
 
