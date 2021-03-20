@@ -11,16 +11,18 @@ Currently supports the following blogging platforms:
 ## How
 
 * Fork this repository.
-* Create an `./articles` directory.
-  * See explanation below.
-* Configure the environment.
+* Install dependencies.
   * `dart pub get`
-* Use the CLI to publish.
+* Create an `./articles` directory with some content.
+  * See [Articles](articles) below.
+* Configure the environment.
+  * See [Configuration](configuration) below
+* Use the [CLI](cli) to publish.
   * `./script/publish`
 
 ### Articles
 
-Articles should be placed in their own directory inside an `articles` directory:
+Articles should be placed in their own directory inside an `./articles` directory:
 
 ```bash
 ./articles
