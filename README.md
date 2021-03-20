@@ -8,16 +8,18 @@ Currently supports the following blogging platforms:
 
 * Wordpress
 
+_I should probably just call this wordpress-markdown-blogger..._
+
 ## How
 
 * Fork this repository.
 * Install dependencies.
   * `dart pub get`
 * Create an `./articles` directory with some content.
-  * See [Articles](articles) below.
+  * See [Articles](#articles) below.
 * Configure the environment.
-  * See [Configuration](configuration) below
-* Use the [CLI](cli) to publish.
+  * See [Configuration](#configuration) below
+* Use the [CLI](#cli) to publish.
   * `./script/publish`
 
 ### Articles
