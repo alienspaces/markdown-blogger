@@ -42,7 +42,9 @@ Articles should be placed in their own directory inside an `./articles` director
 
 * There should be only one `.md` file per directory.
 * A `<h1>` tag found on the first row after HTML conversion will be used as the article title. If not found then the `.md` file name will be used as the article title.
+  * `# This is a title`
 * The first `<blockquote>` or `<p>` element will be used as the article excerpt.
+  * `> This will be used as the excerpt`
 * If an image with a name of `featured` exists in the article directory it will be used as the articles "featured image" appearing at the top of the article.
 * A `.meta` file will be created automatically in each article directory to track changes. If you delete this file new posts will be created.
 
@@ -74,6 +76,17 @@ To publish articles manually or via your CI pipeline:
 ./tool/publish
 # Delete all articles
 ./tool/delete
+```
+
+### Tools
+
+#### Banner
+
+Create a `featured.png` image from an existing banner image.
+
+```bash
+$ ./script/banner --banner flutter --text 'Unit testing in Flutter'
+INFO: 2021-03-21 21:25:59.050215: main: Created ./articles/2021-03-21/featured.png
 ```
 
 ## Why

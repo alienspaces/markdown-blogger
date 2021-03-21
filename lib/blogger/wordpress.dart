@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import 'markdown_blogger.dart';
+import '../blogger.dart';
 
 class WordpressPost {
   final int id;

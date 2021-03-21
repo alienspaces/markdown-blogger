@@ -1,10 +1,10 @@
-// Publish articles to monsterweekly.com
+// Blogger synchronizes articles formatted in markdown to a wordpress blog site.
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 
-import 'package:markdown_blogger/markdown_blogger.dart';
+import 'package:markdown_blogger/blogger.dart';
 
 const argDelete = 'delete';
 const argPublish = 'publish';

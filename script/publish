@@ -2,4 +2,4 @@
 
 source .env
 
-dart ./bin/main.dart --publish
+dart ./bin/blogger.dart --publish

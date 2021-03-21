@@ -2,4 +2,4 @@
 
 source .env
 
-dart ./bin/blogger.dart --delete
+dart ./bin/banner.dart "$@"
