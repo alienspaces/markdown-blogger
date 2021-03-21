@@ -73,9 +73,9 @@ To publish articles manually or via your CI pipeline:
 
 ```bash
 # Publish new and update all articles
-./tool/publish
+./script/publish
 # Delete all articles
-./tool/delete
+./script/delete
 ```
 
 ### Tools
