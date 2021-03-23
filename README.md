@@ -94,8 +94,10 @@ INFO: 2021-03-21 21:25:59.050215: main: Created ./articles/2021-03-21/featured.p
 As a developer:
 
 * I wanted to learn the [Dart](https://dart.dev/guides) programming language
-* Make blogging about my favourite things easier
+* Make blogging to Wordpress in a format I can deal with easier
 
-So now I can collect information or write about stuff and then [publish](https://alienspaces.com) those articles using a tool I built with [Dart](https://dart.dev/guides).
+## Epilogue
 
-Cool!
+I do not need Wordpress, specifically the cost, so I am subsequently moving [https://alienspaces.com](https://alienspaces.com) to another location, more than likely a github page.
+
+So while the code in this repository is functional, it is no longer maintained, sorry!
