@@ -69,7 +69,7 @@ To publish articles manually or via your CI pipeline:
 
 * Install Dart [https://dart.dev/get-dart](https://dart.dev/get-dart)
 * Create a `.env` file with your configuration
-* Use scripts in the `./tool` directory
+* Use scripts in the `./scripts` directory
 
 ```bash
 # Publish new and update all articles
